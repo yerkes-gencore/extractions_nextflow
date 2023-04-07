@@ -96,8 +96,7 @@ process delay_start {
     // output:
     //     stdout
     """
-    #echo "delaying extraction by ${params.delay_start} hours"
-    sleep ${time}h
+    sleep ${params.delay_start}h
     """
 
     stub:
@@ -189,13 +188,15 @@ process runtime_snapshot {
     """   
 }
 
+if (params.delay_start.toFloat() > 0) {
+    println "Delaying worfklow by ${params.delay_start} hours"
+    Thread.sleep((params.delay_start.toFloat()*1000*3600).intValue())
+    //delay_start(params.delay_start.toFloat())
+}
+
 workflow {
     println "Workflow start: $workflow.start"
     runtime_snapshot(workflow.configFiles.toSet())
-    if (params.delay_start.toFloat() > 0) {
-        println "Delaying extraction by ${params.delay_start} hours"
-        delay_start(params.delay_start.toFloat())
-    }
     // have to pass in a file in the output folder, the completed file would be a good indicator
     // when a file is passed, the parent directory is mounted with the docker container
         //seq_complete_ch = Channel.watchPath("${params.run_dir}/RTAComplete.txt", 'create,modify')
