@@ -90,20 +90,6 @@ process xml_parse {
     """
 }
 
-process delay_start {
-    input:
-        val time
-    // output:
-    //     stdout
-    """
-    sleep ${params.delay_start}h
-    """
-
-    stub:
-    """
-    """
-}
-
 process check_RTAComplete {
     output:
         val 'ok'
@@ -191,7 +177,6 @@ process runtime_snapshot {
 if (params.delay_start.toFloat() > 0) {
     println "Delaying worfklow by ${params.delay_start} hours"
     Thread.sleep((params.delay_start.toFloat()*1000*3600).intValue())
-    //delay_start(params.delay_start.toFloat())
 }
 
 workflow {
