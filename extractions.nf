@@ -22,6 +22,21 @@ if (params.help) {
 // /* --          VALIDATE INPUTS                 -- */
 // ////////////////////////////////////////////////////
 
+def validations() {
+    try { 
+        file(params.run_dir, checkIfExists: true)
+    } catch (e) {
+        println "\nRun directory not found. See reference in config.\n\nExiting\n"
+        exit 1
+    }
+    if (!(params.sample_sheets.isEmpty() || (params.sample_sheets instanceof Map && params.sample_sheets.every { k, v -> v instanceof String } ))) {
+        println "Parameter 'sample_sheets' is not a map of strings (or empty), please correct and rerun"
+        exit 1
+    }
+
+
+}
+validations()
 
 // ////////////////////////////////////////////////////
 // /* --              PROCESSES                   -- */
@@ -173,6 +188,11 @@ process runtime_snapshot {
     echo 'stubrun' >> nextflow_extraction_run_details.txt
     """   
 }
+
+// ////////////////////////////////////////////////////
+// /* --               WORKFLOW                   -- */
+// ////////////////////////////////////////////////////
+
 
 if (params.delay_start.toFloat() > 0) {
     println "Delaying worfklow by ${params.delay_start} hours"
