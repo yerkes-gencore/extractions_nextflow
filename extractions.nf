@@ -217,7 +217,8 @@ workflow {
             Channel.fromList(params.sample_sheets.keySet())
                 .set{ sample_sheets }
         }
-        bcl2fastq(check_RTAComplete, sample_sheets)
+        check_RTAComplete()
+        bcl2fastq(check_RTAComplete.out, sample_sheets)
         xml_parse(bcl2fastq.out)
         if (params.compute_md5sums) {
             md5checksums(bcl2fastq.out.collect())
