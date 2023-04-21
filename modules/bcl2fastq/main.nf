@@ -51,6 +51,7 @@ process bcl2fastq {
         //path "Unaligned*", type: 'dir'
         val output_label, emit: label
         val "${params.run_dir}/Unaligned_${output_label}", emit: output_dir
+        //val "${params.run_dir}/Unaligned_${output_label}/Reports/html/*/all/all/all/laneBarcode.html", emit: laneBarcode
         //path "Unaligned_${output_label}/Stats/DemultiplexingStats.xml"
     script:
     if (params.sample_sheets.isEmpty()){
@@ -91,7 +92,8 @@ process xml_parse {
         val output_label
         //path statsfile
     output:
-        path 'DemultiplexingStats.csv'
+        val "${params.run_dir}/Unaligned_${output_label}/DemultiplexingStats.csv", emit: demuxstats
+        val output_label, emit: label
     script:
     """
     python ${projectDir}/scripts/xmlParse.py ${params.run_dir}/Unaligned_${output_label}/Stats/DemultiplexingStats.xml DemultiplexingStats.csv

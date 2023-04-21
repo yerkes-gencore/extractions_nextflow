@@ -44,6 +44,23 @@ include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/ma
 include { md5checksums } from './modules/md5sum/main.nf'
 include { runtime_snapshot } from '/yerkes-cifs/runs/tools/automation/shared_modules/runtime_snapshot/main.nf'
 
+process mail_extraction_complete {
+    stageInMode "copy"
+    input:
+        //val label
+        path demuxfile
+    exec:
+    // if (file(demuxfile, checkIfExists: true)){
+        sendMail(
+            to: "${params.emails}",
+            subject: "Extraction $label Complete",
+            attach: demuxfile
+        )
+    // } else {
+        // println 'Could not find extraction html reports to mail'
+    // }
+}
+
 // ////////////////////////////////////////////////////
 // /* --               WORKFLOW                   -- */
 // ////////////////////////////////////////////////////
@@ -75,6 +92,15 @@ workflow extractions {
         check_RTAComplete()
         bcl2fastq(check_RTAComplete.out, sample_sheets)
         xml_parse(bcl2fastq.out.label)
+        // if (params.emails?.trim()){
+        //     //mail_extraction_complete(xml_parse.out.label, xml_parse.out.demuxstats)
+        //     sendMail(
+        //         to: "${params.emails}",
+        //         subject: "Extraction Complete",
+        //         attach: ,
+        //         body: ""
+        //     )
+        // }
         if (params.compute_md5sums) {
             md5checksums(bcl2fastq.out.label.collect())
         }
