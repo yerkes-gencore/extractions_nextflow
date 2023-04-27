@@ -42,7 +42,7 @@ validations()
 
 include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/main.nf'
 include { md5checksums } from './modules/md5sum/main.nf'
-include { runtime_snapshot } from '/yerkes-cifs/runs/tools/automation/shared_modules/runtime_snapshot/main.nf'
+include { runtime_snapshot } from './modules/runtime_snapshot/main.nf'
 
 process mail_extraction_complete {
     stageInMode "copy"
@@ -73,7 +73,7 @@ if (params.delay_start.toFloat() > 0) {
 
 workflow extractions {
     main:
-        runtime_snapshot(workflow.configFiles.toSet())
+        runtime_snapshot(workflow.configFiles.toSet(), params.run_dir)
         // have to pass in a file in the output folder, the completed file would be a good indicator
         // when a file is passed, the parent directory is mounted with the docker container
             //seq_complete_ch = Channel.watchPath("${params.run_dir}/RTAComplete.txt", 'create,modify')
