@@ -73,7 +73,7 @@ if (params.delay_start.toFloat() > 0) {
 
 workflow extractions {
     main:
-        runtime_snapshot(workflow.configFiles.toSet(), params.outdir)
+        runtime_snapshot(workflow.configFiles.toSet(), params.run_dir)
         // have to pass in a file in the output folder, the completed file would be a good indicator
         // when a file is passed, the parent directory is mounted with the docker container
             //seq_complete_ch = Channel.watchPath("${params.run_dir}/RTAComplete.txt", 'create,modify')
