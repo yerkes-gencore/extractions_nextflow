@@ -42,7 +42,7 @@ validations()
 
 include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/main.nf'
 include { md5checksums } from './modules/md5sum/main.nf'
-include { runtime_snapshot } from '/yerkes-cifs/runs/tools/automation/shared_modules/runtime_snapshot/main.nf'
+include { runtime_snapshot } from './modules/runtime_snapshot/main.nf'
 
 process mail_extraction_complete {
     stageInMode "copy"
