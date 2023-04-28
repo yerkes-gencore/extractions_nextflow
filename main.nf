@@ -56,7 +56,7 @@ if (params.delay_start.toFloat() > 0) {
 
 workflow extractions {
     main:
-        runtime_snapshot(workflow.configFiles.toSet(), params.run_dir)
+        runtime_snapshot(workflow.configFiles.toSet().last(), params.run_dir)
         if (params.sample_sheets.isEmpty()) {
             Channel.fromPath("${params.run_dir}/*[Dd][Ee][Mm][Uu][Xx]*.csv", type: 'file')
                 .set{ sample_sheets }
