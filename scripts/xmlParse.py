@@ -16,7 +16,7 @@ with open(sys.argv[2], 'w') as fo:
         for project in flowcell:
             for sample in project:
                 for barcode in sample:
-                    if barcode != 'all':
+                    if barcode.attrib['name'] != 'all':
                         for lane in barcode:
                             row = {key: '' for key in row_headers}
                             row['Flowcell'] = flowcell.attrib['flowcell-id']
