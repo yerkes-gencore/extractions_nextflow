@@ -92,14 +92,11 @@ process xml_parse {
         val output_label
         //path statsfile
     output:
-        val "${params.run_dir}/Unaligned_${output_label}/DemultiplexingStats.csv", emit: demuxstats
+        path "DemultiplexingStats.csv", emit: demuxstats
+        val "${params.run_dir}/Unaligned_${output_label}/DemultiplexingStats.csv", emit: demux_file_path
         val output_label, emit: label
     script:
     """
     python ${projectDir}/scripts/xmlParse.py ${params.run_dir}/Unaligned_${output_label}/Stats/DemultiplexingStats.xml DemultiplexingStats.csv
-    """
-    stub:
-    """
-    touch DemultiplexingStats.csv
     """
 }

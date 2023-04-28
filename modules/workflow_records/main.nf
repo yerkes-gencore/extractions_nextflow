@@ -29,3 +29,20 @@ process runtime_snapshot {
     echo 'stubrun'# >> nextflow_extraction_run_details.txt
     """   
 }
+
+process mail_extraction_complete {
+    input:
+        val label
+        val demuxfile
+    exec:
+    try {
+        sendMail(
+            to: "${params.emails}",
+            subject: "Extraction $label Complete",
+            attach: "${demuxfile}",
+            body: "hello"
+        )
+    } catch (e) {
+        println 'Could not find extraction reports to mail'
+    }
+}

@@ -42,24 +42,7 @@ validations()
 
 include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/main.nf'
 include { md5checksums } from './modules/md5sum/main.nf'
-include { runtime_snapshot } from './modules/runtime_snapshot/main.nf'
-
-process mail_extraction_complete {
-    stageInMode "copy"
-    input:
-        //val label
-        path demuxfile
-    exec:
-    // if (file(demuxfile, checkIfExists: true)){
-        sendMail(
-            to: "${params.emails}",
-            subject: "Extraction $label Complete",
-            attach: demuxfile
-        )
-    // } else {
-        // println 'Could not find extraction html reports to mail'
-    // }
-}
+include { runtime_snapshot; mail_extraction_complete } from './modules/workflow_records/main.nf'
 
 // ////////////////////////////////////////////////////
 // /* --               WORKFLOW                   -- */
@@ -74,14 +57,6 @@ if (params.delay_start.toFloat() > 0) {
 workflow extractions {
     main:
         runtime_snapshot(workflow.configFiles.toSet(), params.run_dir)
-        // have to pass in a file in the output folder, the completed file would be a good indicator
-        // when a file is passed, the parent directory is mounted with the docker container
-            //seq_complete_ch = Channel.watchPath("${params.run_dir}/RTAComplete.txt", 'create,modify')
-            //    .take(1)// .until { file -> file.name != 'asd' }
-                //.flatMap { file -> Channel.value(file) }
-                // .until { file -> file.name != 'asd' }
-                // .set{ seq_complete }
-            //seq_complete_ch.view()
         if (params.sample_sheets.isEmpty()) {
             Channel.fromPath("${params.run_dir}/*[Dd][Ee][Mm][Uu][Xx]*.csv", type: 'file')
                 .set{ sample_sheets }
@@ -92,15 +67,9 @@ workflow extractions {
         check_RTAComplete()
         bcl2fastq(check_RTAComplete.out, sample_sheets)
         xml_parse(bcl2fastq.out.label)
-        // if (params.emails?.trim()){
-        //     //mail_extraction_complete(xml_parse.out.label, xml_parse.out.demuxstats)
-        //     sendMail(
-        //         to: "${params.emails}",
-        //         subject: "Extraction Complete",
-        //         attach: ,
-        //         body: ""
-        //     )
-        // }
+        if (params.emails?.trim()){
+            mail_extraction_complete(xml_parse.out.label, xml_parse.out.demux_file_path)
+        }
         if (params.compute_md5sums) {
             md5checksums(bcl2fastq.out.label.collect())
         }
@@ -113,25 +82,25 @@ workflow {
     extractions()
 }
 
-workflow.onComplete {
-    if (workflow.profile != 'dryrun') {
-        if (params.emails?.trim()){
-            def msg = """\
-            Pipeline execution summary
-            ---------------------------
-            Completed at    : ${workflow.complete}
-            Duration        : ${workflow.duration}
-            Success         : ${workflow.success}
-            workDir         : ${workflow.workDir}
-            exit status     : ${workflow.exitStatus}
-            runDir          : ${params.run_dir}
-            NF runName      : ${workflow.runName}
-            """
-            .stripIndent()
-            sendMail(to: "${params.emails}", subject: 'Extraction Complete', body: msg)
-        } 
-    }
-}
+// workflow.onComplete {
+//     if (workflow.profile != 'dryrun') {
+//         if (params.emails?.trim()){
+//             def msg = """\
+//             Pipeline execution summary
+//             ---------------------------
+//             Completed at    : ${workflow.complete}
+//             Duration        : ${workflow.duration}
+//             Success         : ${workflow.success}
+//             workDir         : ${workflow.workDir}
+//             exit status     : ${workflow.exitStatus}
+//             runDir          : ${params.run_dir}
+//             NF runName      : ${workflow.runName}
+//             """
+//             .stripIndent()
+//             sendMail(to: "${params.emails}", subject: 'Extraction Complete', body: msg)
+//         } 
+//     }
+// }
 
 
 // ////////////////////////////////////////////////////
@@ -178,3 +147,12 @@ workflow.onComplete {
 //     gh repo create yerkes-gencore/${params.project_name} --template yerkes-gencore/bulk_template --private
 //     """
 // }
+
+// have to pass in a file in the output folder, the completed file would be a good indicator
+// when a file is passed, the parent directory is mounted with the docker container
+    //seq_complete_ch = Channel.watchPath("${params.run_dir}/RTAComplete.txt", 'create,modify')
+    //    .take(1)// .until { file -> file.name != 'asd' }
+        //.flatMap { file -> Channel.value(file) }
+        // .until { file -> file.name != 'asd' }
+        // .set{ seq_complete }
+    //seq_complete_ch.view()
