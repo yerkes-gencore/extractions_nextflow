@@ -70,6 +70,7 @@ process bcl2fastq {
         --output-dir Unaligned_${output_label} \
         --sample-sheet ${sheet} \
         --runfolder-dir ${params.run_dir} \
+        --barcode-mismatches ${params.barcode-mismatches}
         --fastq-compression-level ${params.compression} > extract_${output_label}.stderr > extract_${output_label}.stdout
     mv extract_${output_label}.std* Unaligned_${output_label}/
     cp ${sheet} Unaligned_${output_label}/
