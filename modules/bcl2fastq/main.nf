@@ -42,6 +42,7 @@ process check_RTAComplete {
 }
 
 process bcl2fastq {
+    errorStrategy 'finish'
     maxForks params.maxForks
     //publishDir "${params.run_dir}", mode: 'move'
     input: 
