@@ -34,6 +34,9 @@ process check_RTAComplete {
     // else
     //     echo "Maximum wait time exceeded, file not found"
     // fi
+    
+    // Wait 5 minutes in case bcl files aren't finished writing 
+    sleep(60 * 60 * 5)
     """
     """
     stub:
@@ -42,7 +45,7 @@ process check_RTAComplete {
 }
 
 process bcl2fastq {
-    errorStrategy 'finish'
+    //errorStrategy 'finish'
     maxForks params.maxForks
     //publishDir "${params.run_dir}", mode: 'move'
     input: 
@@ -71,7 +74,7 @@ process bcl2fastq {
         --output-dir Unaligned_${output_label} \
         --sample-sheet ${sheet} \
         --runfolder-dir ${params.run_dir} \
-        --barcode-mismatches ${params.barcode-mismatches}
+        --barcode-mismatches ${params.barcode_mismatches} \
         --fastq-compression-level ${params.compression} > extract_${output_label}.stderr > extract_${output_label}.stdout
     mv extract_${output_label}.std* Unaligned_${output_label}/
     cp ${sheet} Unaligned_${output_label}/
