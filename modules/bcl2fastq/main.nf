@@ -3,9 +3,9 @@ process check_RTAComplete {
         val 'ok'
     script:
     // def wait_time = params.max_wait * 60 * 60  // Maximum wait time in seconds 
-    def sleep_interval = params.wait_interval * 60 * 1000
+    def sleep_interval = params.wait_interval * 60 * 1000 * 10 // 10 minutes
     def start_time = System.currentTimeMillis()
-    def max_millis = params.max_wait * 60 * 60 * 1000
+    def max_millis = params.max_wait * 60 * 60 * 1000 // params.max_wait * 1 hour
     //def input_file = "${params.run_dir}/RTAComplete.txt"
     def file_exists = file("${params.run_dir}/RTAComplete.txt").exists()
     if (!file_exists){
@@ -35,8 +35,8 @@ process check_RTAComplete {
     //     echo "Maximum wait time exceeded, file not found"
     // fi
     
-    // Wait 5 minutes in case bcl files aren't finished writing 
-    sleep(60 * 60 * 5)
+    // Wait 1 minutes in case bcl files aren't finished writing 
+    sleep(60 * 1000) 
     """
     """
     stub:
