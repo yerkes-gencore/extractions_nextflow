@@ -49,7 +49,7 @@ process mail_extraction_complete {
             to: "${params.emails}",
             subject: "Extraction $label Complete",
             attach: "${demuxfile}",
-            body: "hello"
+            body: "See the attachment for demultiplexing results"
         )
     } catch (e) {
         println 'Could not find extraction reports to mail'
