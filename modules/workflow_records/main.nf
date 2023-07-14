@@ -30,6 +30,15 @@ process runtime_snapshot {
     """   
 }
 
+process check_params {
+    output:
+        stdout
+    exec:
+    println "\nRunning with parameters:"
+    println "rundir: " + params.run_dir
+    println "barcode_mismatches: " + params.barcode_mismatches
+}
+
 process mail_extraction_complete {
     input:
         val label
