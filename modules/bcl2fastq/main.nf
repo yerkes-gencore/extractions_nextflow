@@ -36,6 +36,7 @@ process check_RTAComplete {
     // fi
     
     // Wait 1 minutes in case bcl files aren't finished writing 
+    println 'RTA detected! Waiting a minute to ensure files are finished writing'
     sleep(60 * 1000) 
     // """
     // """
