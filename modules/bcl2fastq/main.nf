@@ -1,7 +1,7 @@
 process check_RTAComplete {
     output:
         val 'ok'
-    script:
+    exec:
     // def wait_time = params.max_wait * 60 * 60  // Maximum wait time in seconds 
     def sleep_interval = params.wait_interval * 60 * 1000 * 10 // 10 minutes
     def start_time = System.currentTimeMillis()
@@ -37,24 +37,24 @@ process check_RTAComplete {
     
     // Wait 1 minutes in case bcl files aren't finished writing 
     sleep(60 * 1000) 
-    """
-    """
-    stub:
-    """
-    """
+    // """
+    // """
+    // stub:
+    // """
+    // """
 }
 
 process bcl2fastq {
     //errorStrategy 'finish'
     maxForks params.maxForks
-    //publishDir "${params.run_dir}", mode: 'move'
+    publishDir "${params.run_dir}/Unaligned_${output_label}", mode: 'copy'
     input: 
         val seq_complete
         val sheet                                      
     output:
         //path "Unaligned*", type: 'dir'
         val output_label, emit: label
-        val "${params.run_dir}/Unaligned_${output_label}", emit: output_dir
+        path "Unaligned_${output_label}/*", emit: output_dir
         //val "${params.run_dir}/Unaligned_${output_label}/Reports/html/*/all/all/all/laneBarcode.html", emit: laneBarcode
         //path "Unaligned_${output_label}/Stats/DemultiplexingStats.xml"
     script:
@@ -69,7 +69,7 @@ process bcl2fastq {
         // #--processing-threads 10 \
         // #--writing-threads 10 \
     """
-    cd ${params.run_dir}
+    #cd ${params.run_dir}
     bcl2fastq \
         --output-dir Unaligned_${output_label} \
         --sample-sheet ${sheet} \
@@ -77,7 +77,7 @@ process bcl2fastq {
         --barcode-mismatches ${params.barcode_mismatches} \
         --fastq-compression-level ${params.compression} > extract_${output_label}.stderr > extract_${output_label}.stdout
     mv extract_${output_label}.std* Unaligned_${output_label}/
-    cp ${sheet} Unaligned_${output_label}/
+    #cp ${sheet} Unaligned_${output_label}/
     """
     stub:
     if (params.sample_sheets.isEmpty()){
