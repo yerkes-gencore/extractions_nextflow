@@ -43,6 +43,7 @@ validations()
 include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/main.nf'
 include { md5checksums } from './modules/md5sum/main.nf'
 include { check_params; runtime_snapshot; mail_extraction_complete } from './modules/workflow_records/main.nf'
+include { verify_indices } from './modules/verify_indices/main.nf'
 
 // ////////////////////////////////////////////////////
 // /* --               WORKFLOW                   -- */
@@ -57,6 +58,12 @@ if (params.delay_start.toFloat() > 0) {
 workflow extractions {
     main:
         check_params() | view()
+        verify_indices()
+        if (params.auto_calculate_barcodes) {
+            params.barcode_mismatches = File(verify_indices.out).text
+            println params.barcode_mismatches
+        } 
+        exit 1
         runtime_snapshot(workflow.configFiles.toSet().last(), params.run_dir)
         if (params.sample_sheets.isEmpty()) {
             Channel.fromPath("${params.run_dir}/*[Dd][Ee][Mm][Uu][Xx]*.csv", type: 'file')
