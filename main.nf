@@ -61,6 +61,8 @@ workflow extractions {
         if (params.sample_sheets.isEmpty()) {
             Channel.fromPath("${params.run_dir}/*[Dd][Ee][Mm][Uu][Xx]*.csv", type: 'file')
                 .set{ sample_sheets }
+            println 'No sample sheets explicitly provided, using the following sheets found in the directory'
+            sample_sheets.view()
         } else {
             Channel.fromList(params.sample_sheets.keySet())
                 .set{ sample_sheets }
