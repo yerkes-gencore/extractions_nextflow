@@ -93,6 +93,7 @@ process bcl2fastq {
 
 process xml_parse {
     publishDir "${params.run_dir}/Unaligned_${output_label}/", mode: 'copy'
+    errorStrategy 'ignore'
     input:
         val output_label
         //path statsfile
