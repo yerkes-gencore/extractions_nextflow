@@ -58,12 +58,6 @@ if (params.delay_start.toFloat() > 0) {
 workflow extractions {
     main:
         check_params() | view()
-        verify_indices()
-        if (params.auto_calculate_barcodes) {
-            params.barcode_mismatches = File(verify_indices.out).text
-            println params.barcode_mismatches
-        } 
-        exit 1
         runtime_snapshot(workflow.configFiles.toSet().last(), params.run_dir)
         if (params.sample_sheets.isEmpty()) {
             Channel.fromPath("${params.run_dir}/*[Dd][Ee][Mm][Uu][Xx]*.csv", type: 'file')
@@ -74,6 +68,12 @@ workflow extractions {
             Channel.fromList(params.sample_sheets.keySet())
                 .set{ sample_sheets }
         }
+        verify_indices(sample_sheets)
+        if (params.auto_calculate_barcodes) {
+            params.barcode_mismatches = File(verify_indices.out).text
+            println params.barcode_mismatches
+        } 
+        exit 1
         check_RTAComplete()
         bcl2fastq(check_RTAComplete.out, sample_sheets)
         xml_parse(bcl2fastq.out.label)
