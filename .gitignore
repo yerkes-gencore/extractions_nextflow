@@ -23,6 +23,7 @@ nextflow.iml
 Vagrantfile
 resources/*
 test/*
+test_data/*
 tools/*
 tests_other
 other
