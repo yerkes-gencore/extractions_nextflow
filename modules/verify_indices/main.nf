@@ -1,11 +1,14 @@
 process verify_indices {
     conda 'conda/verify_indices_conda.yml'
     input:
-        path samplesheet
+        val samplesheet
     output:
-        path 'barcode_mismatch_calculations.txt'
+        // path 'barcode_mismatch_calculations.txt'
+        stdout  emit: stdout
+        env MISMATCH_VALUES, emit: mismatch_values
     script:
     """
-    python scripts/verify_indices.py -i ${samplesheet} -o barcode_mismatch_calculations.txt
+    python ${projectDir}/scripts/verify_indices.py -i ${samplesheet} -o barcode_mismatch_calculations.txt
+    MISMATCH_VALUES=\$(cat barcode_mismatch_calculations.txt)
     """
 }
