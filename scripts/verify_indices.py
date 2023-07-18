@@ -4,6 +4,7 @@ import argparse as ap
 import pandas as pd
 import numpy as np
 import csv
+from sys import exit
 # from Levenshtein import distance
 from scipy.spatial.distance import squareform
 from itertools import combinations
@@ -45,7 +46,8 @@ def validate_indices(data):
     allowed_mismatches = []
     ## making it explicit incase this understanding changes
     illumina_formula = lambda x: (2*x) + 1
-    for index, value in min_edit_distance.items():
+    for index in indices:
+        value = min_edit_distance[index]
         ## Default of 1
         # if value >= illumina_formula(2):
         #     allowed_mismatches.append(2)
@@ -53,19 +55,20 @@ def validate_indices(data):
             allowed_mismatches.append('1')
         elif value >= illumina_formula(0):
             matching_indices = distances[index][distances[index]<3].index.to_list()
-            print('\nWarning: barcode {} is too close to the following barcode(s):\n \
-                  {}\nand will require 0 allowed mismatches\n'.format(index, matching_indices))
+            print('Barcode {} is too close to the following barcode(s): {} and will require 0 allowed mismatches'.format(index, matching_indices))
             allowed_mismatches.append('0')
         else:
             print('ERROR: Barcode {} is present twice in the samplesheet'.format(index))
+            exit('Quitting program. Fix the identical barcode issues and rerun.')
             allowed_mismatches.append('NaN')
-    return allowed_mismatches
+    return allowed_mismatches, indices
 
 args = get_args()
 samplesheet = parse_input(args.input_file)
-allowed_mismatches = validate_indices(samplesheet)
+allowed_mismatches, indices = validate_indices(samplesheet)
 #. Final allowed mismatch values:")
 with open(args.output_file, 'w') as fo:
-    fo.write(", ".join(allowed_mismatches) + '\n')
+    fo.write(min(allowed_mismatches))
 
-print("Program complete")
+print('Samplehseet {} needs barcode-mismatches set to {}'.format(args.input_file, min(allowed_mismatches)))
+# print("Index verification complete")
