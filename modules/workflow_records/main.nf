@@ -31,12 +31,18 @@ process runtime_snapshot {
 }
 
 process check_params {
+    input:
+        val 'ok'
+        val rundir
+        val samaplesheet
+        val mismatches
     output:
         stdout
     exec:
     println "\nRunning with parameters:"
-    println "rundir: " + params.run_dir
-    println "barcode_mismatches: " + params.barcode_mismatches
+    println "rundir: " + rundir
+    println "samplehseet: " + samaplesheet
+    println "barcode_mismatches: " + mismatches
 }
 
 process mail_extraction_complete {
