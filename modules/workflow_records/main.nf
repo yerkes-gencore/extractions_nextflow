@@ -32,7 +32,7 @@ process runtime_snapshot {
 
 process check_params {
     input:
-        val 'ok'
+        // val 'ok'
         val rundir
         val samaplesheet
         val mismatches
