@@ -46,18 +46,21 @@ process check_params {
 }
 
 process mail_extraction_complete {
+    // Needs hard path, can't use symlink
+    errorStrategy 'ignore'
+    // stageInMode 'copy'
     input:
         val label
         val demuxfile
     exec:
-    try {
+    // try {
         sendMail(
             to: "${params.emails}",
             subject: "Extraction $label Complete",
             attach: "${demuxfile}",
             body: "See the attachment for demultiplexing results"
         )
-    } catch (e) {
-        println 'Could not find extraction reports to mail'
-    }
+    // } catch (e) {
+    //     println 'Could not find extraction reports to mail'
+    // }
 }
