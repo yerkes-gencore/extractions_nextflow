@@ -73,7 +73,7 @@ process bcl2fastq {
             output_label = task.index
         }
         // allow quick devruns
-        def tile_subset = (workflow.profile == 'dev_test') ? '--tiles [0-9][0-9][0-9]5' : '--tiles [0-9][0-9][0-9]5'
+        def tile_subset = (workflow.profile == 'dev_test') ? '--tiles [0-9][0-9][0-9]5' : ''
         // allow retries with looser settings
         def barcode_mismatches = (task.attempt == 1) ? mismatch_values : '0'
                 // --ignore-missing-bcls \
