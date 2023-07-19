@@ -1,5 +1,5 @@
 process verify_indices {
-    conda 'conda/verify_indices_conda.yml'
+    conda "${projectDir}/conda/verify_indices_conda.yml"
     input:
         val samplesheet
     output:
