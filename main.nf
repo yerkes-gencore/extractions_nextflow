@@ -26,11 +26,11 @@ def validations() {
     try { 
         file(params.run_dir, checkIfExists: true)
     } catch (e) {
-        println "\nRun directory not found. See reference in config.\n\nExiting\n"
+        println "\nRun directory not found. See reference in config or provide it at runtime via --run_dir.\n\nExiting\n"
         exit 1
     }
     if (!(params.sample_sheets.isEmpty() || (params.sample_sheets instanceof Map && params.sample_sheets.every { k, v -> v instanceof String } ))) {
-        println "Parameter 'sample_sheets' is not a map of strings (or empty), please correct and rerun"
+        println "Parameter 'sample_sheets' is not a map of strings (or empty), please correct and rerun.\n\nExiting\n"
         exit 1
     }
 }
