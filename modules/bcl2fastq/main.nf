@@ -100,7 +100,7 @@ process xml_parse {
         //path statsfile
     output:
         // you would think this workflow would be better if you output the actual file as a path, not a val, but apparently not 
-        path "${params.run_dir}/DemultiplexingStats_${output_label}.csv", emit: demuxstats
+        path "DemultiplexingStats_${output_label}.csv", emit: demuxstats
         val "${params.run_dir}/DemultiplexingStats_${output_label}.csv", emit: demux_file_path
         val output_label, emit: label
     script:
