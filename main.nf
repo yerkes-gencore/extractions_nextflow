@@ -43,7 +43,7 @@ validations()
 include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/main.nf'
 include { md5checksums } from './modules/md5sum/main.nf'
 include { check_params; runtime_snapshot; mail_extraction_complete } from './modules/workflow_records/main.nf'
-include { verify_indices } from './modules/verify_indices/main.nf'
+// include { verify_indices } from './modules/verify_indices/main.nf'
 
 // ////////////////////////////////////////////////////
 // /* --               WORKFLOW                   -- */
@@ -63,20 +63,12 @@ workflow extractions {
             Channel.fromList(params.sample_sheets.keySet())
                 .set{ sample_sheets }
         }
-        // Verify indices, set barcode mismatch value
-        verify_indices(sample_sheets)
-        verify_indices.out.stdout.view()
-        if (params.auto_calculate_barcodes) {
-            barcode_mismatches = verify_indices.out.mismatch_values
-        } else {
-            barcode_mismatches = params.barcode_mismatches
-        }
         // print out params being used
-        check_params(verify_indices.out.mismatch_values.collect(), params.run_dir, sample_sheets, barcode_mismatches) | view()
+        check_params(params.run_dir, sample_sheets, params.barcode_mismatches) | view()
         // Wait for RTA complete
-        check_RTAComplete(verify_indices.out.mismatch_values.collect())
+        check_RTAComplete()
         // Run bcl2fastq
-        bcl2fastq(check_RTAComplete.out, params.run_dir, sample_sheets, barcode_mismatches)
+        bcl2fastq(check_RTAComplete.out, params.run_dir, sample_sheets, params.barcode_mismatches)
         // Parse output
         xml_parse(bcl2fastq.out.label, bcl2fastq.out.output_dir)
         if (params.emails?.trim()){
