@@ -31,27 +31,36 @@ process runtime_snapshot {
 }
 
 process check_params {
+    input:
+        val 'ok'
+        val rundir
+        val samaplesheet
+        val mismatches
     output:
         stdout
     exec:
     println "\nRunning with parameters:"
-    println "rundir: " + params.run_dir
-    println "barcode_mismatches: " + params.barcode_mismatches
+    println "rundir: " + rundir
+    println "samplehseet: " + samaplesheet
+    println "barcode_mismatches: " + mismatches
 }
 
 process mail_extraction_complete {
+    // Needs hard path, can't use symlink
+    errorStrategy 'ignore'
+    // stageInMode 'copy'
     input:
         val label
         val demuxfile
     exec:
-    try {
+    // try {
         sendMail(
             to: "${params.emails}",
             subject: "Extraction $label Complete",
             attach: "${demuxfile}",
-            body: "hello"
+            body: "See the attachment for demultiplexing results"
         )
-    } catch (e) {
-        println 'Could not find extraction reports to mail'
-    }
+    // } catch (e) {
+    //     println 'Could not find extraction reports to mail'
+    // }
 }

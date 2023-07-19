@@ -26,11 +26,11 @@ def validations() {
     try { 
         file(params.run_dir, checkIfExists: true)
     } catch (e) {
-        println "\nRun directory not found. See reference in config.\n\nExiting\n"
+        println "\nRun directory not found. See reference in config or provide it at runtime via --run_dir.\n\nExiting\n"
         exit 1
     }
     if (!(params.sample_sheets.isEmpty() || (params.sample_sheets instanceof Map && params.sample_sheets.every { k, v -> v instanceof String } ))) {
-        println "Parameter 'sample_sheets' is not a map of strings (or empty), please correct and rerun"
+        println "Parameter 'sample_sheets' is not a map of strings (or empty), please correct and rerun.\n\nExiting\n"
         exit 1
     }
 }
@@ -43,36 +43,46 @@ validations()
 include { check_RTAComplete; bcl2fastq; xml_parse } from './modules/bcl2fastq/main.nf'
 include { md5checksums } from './modules/md5sum/main.nf'
 include { check_params; runtime_snapshot; mail_extraction_complete } from './modules/workflow_records/main.nf'
+include { verify_indices } from './modules/verify_indices/main.nf'
 
 // ////////////////////////////////////////////////////
 // /* --               WORKFLOW                   -- */
 // ////////////////////////////////////////////////////
 
-
-if (params.delay_start.toFloat() > 0) {
-    println "Delaying worfklow by ${params.delay_start} hours"
-    Thread.sleep((params.delay_start.toFloat()*1000*3600).intValue())
-}
-
 workflow extractions {
     main:
-        check_params() | view()
+        // snapshot run params
         runtime_snapshot(workflow.configFiles.toSet().last(), params.run_dir)
+        // Find samplesheets
         if (params.sample_sheets.isEmpty()) {
             Channel.fromPath("${params.run_dir}/*[Dd][Ee][Mm][Uu][Xx]*.csv", type: 'file')
                 .set{ sample_sheets }
             println 'No sample sheets explicitly provided, using the following sheets found in the directory'
-            sample_sheets.view()
+            sample_sheets | view()
         } else {
             Channel.fromList(params.sample_sheets.keySet())
                 .set{ sample_sheets }
         }
-        check_RTAComplete()
-        bcl2fastq(check_RTAComplete.out, sample_sheets)
-        xml_parse(bcl2fastq.out.label)
+        // Verify indices, set barcode mismatch value
+        verify_indices(sample_sheets)
+        verify_indices.out.stdout.view()
+        if (params.auto_calculate_barcodes) {
+            barcode_mismatches = verify_indices.out.mismatch_values
+        } else {
+            barcode_mismatches = params.barcode_mismatches
+        }
+        // print out params being used
+        check_params(verify_indices.out.mismatch_values.collect(), params.run_dir, sample_sheets, barcode_mismatches) | view()
+        // Wait for RTA complete
+        check_RTAComplete(verify_indices.out.mismatch_values.collect())
+        // Run bcl2fastq
+        bcl2fastq(check_RTAComplete.out, params.run_dir, sample_sheets, barcode_mismatches)
+        // Parse output
+        xml_parse(bcl2fastq.out.label, bcl2fastq.out.output_dir)
         if (params.emails?.trim()){
             mail_extraction_complete(xml_parse.out.label, xml_parse.out.demux_file_path)
         }
+        // compute md5sums in actual folder, don't rely on copied data being similar 
         if (params.compute_md5sums) {
             md5checksums(bcl2fastq.out.label.collect())
         }
@@ -81,6 +91,10 @@ workflow extractions {
 }
 
 workflow {
+    if (params.delay_start.toFloat() > 0) {
+        println "Delaying worfklow by ${params.delay_start} hours"
+        Thread.sleep((params.delay_start.toFloat()*1000*3600).intValue())
+    }
     println "Workflow start: $workflow.start"
     extractions()
 }
@@ -150,12 +164,3 @@ workflow {
 //     gh repo create yerkes-gencore/${params.project_name} --template yerkes-gencore/bulk_template --private
 //     """
 // }
-
-// have to pass in a file in the output folder, the completed file would be a good indicator
-// when a file is passed, the parent directory is mounted with the docker container
-    //seq_complete_ch = Channel.watchPath("${params.run_dir}/RTAComplete.txt", 'create,modify')
-    //    .take(1)// .until { file -> file.name != 'asd' }
-        //.flatMap { file -> Channel.value(file) }
-        // .until { file -> file.name != 'asd' }
-        // .set{ seq_complete }
-    //seq_complete_ch.view()
