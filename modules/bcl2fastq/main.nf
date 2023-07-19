@@ -92,7 +92,7 @@ process bcl2fastq {
 
 process xml_parse {
     publishDir "${params.run_dir}", mode: 'copy'
-    stageOutMode 'copy'
+    // stageOutMode 'copy'
     errorStrategy 'ignore'
     input:
         val output_label
@@ -100,8 +100,8 @@ process xml_parse {
         //path statsfile
     output:
         // you would think this workflow would be better if you output the actual file as a path, not a val, but apparently not 
-        val "${params.run_dir}/DemultiplexingStats_${output_label}.csv", emit: demuxstats
-        // val "${params.run_dir}/Unaligned_${output_label}/DemultiplexingStats_${output_label}.csv", emit: demux_file_path
+        path "${params.run_dir}/DemultiplexingStats_${output_label}.csv", emit: demuxstats
+        val "${params.run_dir}/DemultiplexingStats_${output_label}.csv", emit: demux_file_path
         val output_label, emit: label
     script:
     """

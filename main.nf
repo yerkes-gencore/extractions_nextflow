@@ -80,7 +80,7 @@ workflow extractions {
         // Parse output
         xml_parse(bcl2fastq.out.label, bcl2fastq.out.output_dir)
         if (params.emails?.trim()){
-            mail_extraction_complete(xml_parse.out.label, xml_parse.out.demuxstats)
+            mail_extraction_complete(xml_parse.out.label, xml_parse.out.demux_file_path)
         }
         // compute md5sums in actual folder, don't rely on copied data being similar 
         if (params.compute_md5sums) {
