@@ -105,6 +105,6 @@ process xml_parse {
         val output_label, emit: label
     script:
     """
-    python xmlParse.py ${output_dir}/Stats/DemultiplexingStats.xml DemultiplexingStats_${output_label}.csv
+    python ${projectDir}/scripts/xmlParse.py ${output_dir}/Stats/DemultiplexingStats.xml DemultiplexingStats_${output_label}.csv
     """
 }
