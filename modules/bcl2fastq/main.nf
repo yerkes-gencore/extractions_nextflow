@@ -1,6 +1,6 @@
 process check_RTAComplete {
-    input:
-        val 'ok'
+    // input:
+    //     val 'ok'
     output:
         val 'ok'
     exec:
