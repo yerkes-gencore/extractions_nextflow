@@ -1,4 +1,6 @@
 process check_RTAComplete {
+    input:
+        val 'ok'
     output:
         val 'ok'
     exec:
@@ -46,64 +48,63 @@ process check_RTAComplete {
 }
 
 process bcl2fastq {
-    //errorStrategy 'finish'
+    errorStrategy  { task.attempt <= maxRetries  ? 'retry' : 'finish' }
+    maxRetries 2
     maxForks params.maxForks
-    publishDir "${params.run_dir}/Unaligned_${output_label}", mode: 'copy'
+    publishDir "${run_dir}", mode: 'copy'
     input: 
         val seq_complete
-        val sheet                                      
+        val run_dir
+        val sheet    
+        val mismatch_values                                  
     output:
-        //path "Unaligned*", type: 'dir'
         val output_label, emit: label
-        path "Unaligned_${output_label}/*", emit: output_dir
-        //val "${params.run_dir}/Unaligned_${output_label}/Reports/html/*/all/all/all/laneBarcode.html", emit: laneBarcode
-        //path "Unaligned_${output_label}/Stats/DemultiplexingStats.xml"
+        val "${run_dir}/Unaligned_${output_label}", emit: output_dir
+        // path "extract_*"
+        // val "${params.run_dir}/Unaligned_${output_label}/Reports/html/*/all/all/all/laneBarcode.html", emit: laneBarcode
+        // path "Unaligned_${output_label}/Stats/DemultiplexingStats.xml", emit: demux_stats
     script:
-    if (params.sample_sheets.isEmpty()){
-        output_label = task.index
-    } else if (params.sample_sheets.containsKey(sheet.toString())) {
-        output_label = params.sample_sheets[sheet.toString()]
-    } else {
-        output_label = task.index
-    }
-        //     #--loading-threads 10 \
-        // #--processing-threads 10 \
-        // #--writing-threads 10 \
-    """
-    #cd ${params.run_dir}
-    bcl2fastq \
-        --output-dir Unaligned_${output_label} \
-        --sample-sheet ${sheet} \
-        --runfolder-dir ${params.run_dir} \
-        --barcode-mismatches ${params.barcode_mismatches} \
-        --fastq-compression-level ${params.compression} > extract_${output_label}.stderr > extract_${output_label}.stdout
-    mv extract_${output_label}.std* Unaligned_${output_label}/
-    #cp ${sheet} Unaligned_${output_label}/
-    """
-    stub:
-    if (params.sample_sheets.isEmpty()){
-        output_label = task.index
-    } else if (params.sample_sheets.containsKey(sheet.toString())) {
-        output_label = params.sample_sheets[sheet.toString()]
-    } else {
-        output_label = task.index
-    }
-    """
-    """
+        // label outputs
+        if (params.sample_sheets.isEmpty()){
+            output_label = task.index
+        } else if (params.sample_sheets.containsKey(sheet.toString())) {
+            output_label = params.sample_sheets[sheet.toString()]
+        } else {
+            output_label = task.index
+        }
+        // allow quick devruns
+        def tile_subset = (workflow.profile == 'dev_test') ? '--tiles [0-9][0-9][0-9]5' : '--tiles [0-9][0-9][0-9]5'
+        // allow retries with looser settings
+        def barcode_mismatches = (task.attempt == 1) ? mismatch_values : '0'
+                // --ignore-missing-bcls \
+                // --ignore-missing-filter \
+                // --ignore-missing-positions \
+        """
+        bcl2fastq \
+            --output-dir ${run_dir}/Unaligned_${output_label} \
+            --sample-sheet ${sheet} \
+            --runfolder-dir ${run_dir} \
+            --barcode-mismatches ${barcode_mismatches} \
+            --fastq-compression-level ${params.compression} \
+            ${tile_subset} >> ${run_dir}/extract_${output_label}.stderr >> ${run_dir}/extract_${output_label}.stdout
+        """
 }
 
 process xml_parse {
-    publishDir "${params.run_dir}/Unaligned_${output_label}/", mode: 'copy'
+    publishDir "${params.run_dir}", mode: 'copy'
+    stageOutMode 'copy'
     errorStrategy 'ignore'
     input:
         val output_label
+        val output_dir
         //path statsfile
     output:
-        path "DemultiplexingStats.csv", emit: demuxstats
-        val "${params.run_dir}/Unaligned_${output_label}/DemultiplexingStats.csv", emit: demux_file_path
+        // you would think this workflow would be better if you output the actual file as a path, not a val, but apparently not 
+        val "${params.run_dir}/DemultiplexingStats_${output_label}.csv", emit: demuxstats
+        // val "${params.run_dir}/Unaligned_${output_label}/DemultiplexingStats_${output_label}.csv", emit: demux_file_path
         val output_label, emit: label
     script:
     """
-    python ${projectDir}/scripts/xmlParse.py ${params.run_dir}/Unaligned_${output_label}/Stats/DemultiplexingStats.xml DemultiplexingStats.csv
+    python ${projectDir}/scripts/xmlParse.py ${output_dir}/Stats/DemultiplexingStats.xml DemultiplexingStats_${output_label}.csv
     """
 }
