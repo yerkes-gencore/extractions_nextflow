@@ -24,7 +24,9 @@ Most pipeline parameters have reasonable defaults that you are unlikely to chang
 If you do want to adjust params for a run, you can specify individual parameters 
 directly on the command line. Single parameters can be set via the double-dash notation. E.g.
 
-`nextflow run -latest yerkes-gencore/extractions_nextflow --run_dir <your_dir> --emails 'you@email.com'`
+```
+nextflow run -latest yerkes-gencore/extractions_nextflow --run_dir <your_dir> --emails 'you@email.com'
+```
 
 ## Nextflow arguments
 
