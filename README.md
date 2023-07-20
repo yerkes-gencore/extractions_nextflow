@@ -14,7 +14,8 @@ See the [Managing pipeline versions](#managing-pipeline-versions) section for de
 The only 'required' parameter is `run_dir`: the location of the sequencing data.
 See the next section for setting parameters.
 
-If nextflow is not added to your path, you can call the executable in the tools directory like this
+If nextflow is not added to your path, (you'll get an error saying `bash: nextflow command not found...`)
+you can call the executable in the tools directory like this
 
 `/yerkes-cifs/runs/tools/nextflow/nextflow run ...`
 
