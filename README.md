@@ -1,10 +1,12 @@
 # extractions_nextflow
 
-## Running 
+## Running nextflow
 
 This pipeline can be executed via the command resembling the following:
 
 `nextflow run -latest yerkes-gencore/extractions_nextflow --run_dir <your_path>`
+
+The outputs will be written to the run_dir. 
 
 The `latest` argument tells nextflow to grab the most up-to-date version of the pipeline from this repo.
 See the [Managing pipeline versions](#managing-pipeline-versions) section for details.
@@ -16,7 +18,14 @@ If nextflow is not added to your path, you can call the executable in the tools 
 
 `/yerkes-cifs/runs/tools/nextflow/nextflow_version_19.10.0_build_5170/nextflow run ...`
 
-The outputs will be written to the run_dir. 
+Nextflow also requires java. You probably only have to worry about the java versioning if
+you get errors. If you don't have java installed, you can try running these lines
+
+```
+curl -s "https://get.sdkman.io" | bash
+source "~/.sdkman/bin/sdkman-init.sh"
+sdk install java 17.0.6-tem
+```
 
 ## Parameters
 
