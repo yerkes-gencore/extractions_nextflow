@@ -16,7 +16,7 @@ See the next section for setting parameters.
 
 If nextflow is not added to your path, you can call the executable in the tools directory like this
 
-`/yerkes-cifs/runs/tools/nextflow run ...`
+`/yerkes-cifs/runs/tools/nextflow/nextflow run ...`
 
 Nextflow also requires java. You probably only have to worry about the java versioning if
 you get errors. If you don't have java installed, you can try running these lines
