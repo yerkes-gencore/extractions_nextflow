@@ -7,7 +7,7 @@ This pipeline can be executed via the command resembling the following:
 `nextflow run -latest yerkes-gencore/extractions_nextflow --run_dir <your_path>`
 
 The `latest` argument tells nextflow to grab the most up-to-date version of the pipeline from this repo.
-See the [Managing pipeline versions](#Managing-pipeline-versions) section for details.
+See the [Managing pipeline versions](#managing-pipeline-versions) section for details.
 
 The only 'required' parameter is `run_dir`: the location of the sequencing data.
 See the next section for setting parameters.
